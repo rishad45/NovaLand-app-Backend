@@ -8,7 +8,9 @@ const bodyParser = require('body-parser')
 const jwt = require('jsonwebtoken')
 
 // Configuring dotenv
-// dotenv.config();
+const dotenv = require('dotenv').config()
+const connectToDB = require('./dbConnect') 
+connectToDB() 
 
 // cors
 app.use(cors(
@@ -25,8 +27,13 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 // API routes
+const userRoute = require('./routes/userRouter')
+const adminRoute = require('./routes/adminRouter')
 
 // routes as middleware app.use 
+app.use('/',userRoute)
+app.use('/admin',adminRoute)
+
 
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*'); 
