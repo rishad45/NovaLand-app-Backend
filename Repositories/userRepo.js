@@ -13,5 +13,13 @@ module.exports = {
         }catch(err){
             return 
         }
+    },
+    getuser : async(email)=>{
+        try {
+            return userModel.findOne({email : email}) 
+        } catch (error) {
+            return error
+        }
     }
 }
+
