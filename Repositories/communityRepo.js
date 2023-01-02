@@ -9,13 +9,15 @@ module.exports = {
                 admin: payload.id,
                 name: payload.comName,
                 category: payload.category,
-                privacy: payload.privacy
+                privacy: payload.privacy,
+                users: [{
+                    userId: payload.id
+                }]
             })
         } catch (error) {
             return error
         }
     },
-
 
     getAllCommunities: async (payload) => {
         try {
@@ -24,6 +26,7 @@ module.exports = {
             return error
         }
     },
+
     getUserCommunities: async (payload) => {
         try {
             console.log("load", payload)
@@ -48,6 +51,7 @@ module.exports = {
             return error
         }
     },
+
     getRecommendedCommunities: async (payload) => {
         try {
             return await communityModel.aggregate(
@@ -55,11 +59,11 @@ module.exports = {
                     {
                         '$match': {
                             'users.userId': {
-                                '$ne': mongoose.Types.ObjectId(payload) 
+                                '$ne': mongoose.Types.ObjectId(payload)
                             }
                         }
                     }
-                ] 
+                ]
             )
         } catch (error) {
 
@@ -81,11 +85,70 @@ module.exports = {
             return error
         }
     },
+
     joinInPrivateCommunity: async (payload) => {
         try {
             return await communityModel.updateOne({ _id: payload.communityId }, { $push: { users: { userId: payload.id, pending: true } } })
         } catch (error) {
             return error
         }
+    },
+
+    getCommunityInfo: async (payload) => {
+        try {
+            return await communityModel.aggregate(
+                [
+                    {
+                        '$match': {
+                            '_id': mongoose.Types.ObjectId(payload)
+                        }
+                    }, {
+                        '$lookup': {
+                            'from': 'users',
+                            'localField': 'admin',
+                            'foreignField': '_id',
+                            'as': 'admin'
+                        }
+                    }, {
+                        '$project': {
+                            '_id': 0,
+                            'admin._id': 0,
+                            'admin.password': 0,
+                            'admin.__v': 0,
+                            '__v': 0
+                        }
+                    }
+                ]
+            )
+        } catch (error) {
+            console.log(error)
+            return error
+        }
+    },
+
+    checkUserinCommunity: async (payload) => {
+        try {
+            const response = await communityModel.find({ _id: payload.communityId, users: { $elemMatch: { userId: payload.userId } } })
+            if (response.length != 0) return true
+            return false
+        } catch (error) {
+            return error
+        }
+    },
+    checkIsuserAdmin: async (payload) => {
+        try {
+            const response = await communityModel.findOne({ _id: payload.communityId, admin: payload.userId })
+            console.log("is admin", response)
+            if (response === null) return false
+            return true
+        } catch (error) {
+
+        }
+    },
+    // leave community
+    leaveCommunity: async (payload) => {
+        return await communityModel.updateOne({ _id: payload.communityId },
+            { $pull: { users: { userId: payload.id } } }
+        )
     }
 }

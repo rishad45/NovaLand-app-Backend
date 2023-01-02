@@ -3,9 +3,9 @@ const app = express()
 
 const cors = require('cors')
 const cookieParser = require('cookie-parser')
+
+// file uploading
 const bodyParser = require('body-parser')
-const fileupload = require('express-fileupload')
-const multer = require('multer')
 
 const jwt = require('jsonwebtoken')
 
@@ -28,7 +28,12 @@ app.use(cors(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(fileupload());
+// app.use(fileUpload({ 
+//     useTempFiles : true,
+//     limits:{
+//         fileSize: 10 * 100 * 1000 * 5
+//     }
+// })) 
 app.use(express.static("files"));
 
 // API routes
@@ -60,3 +65,5 @@ app.get('/', (req, res) => {
 
 
 module.exports = app
+
+

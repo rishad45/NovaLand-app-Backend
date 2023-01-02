@@ -30,9 +30,17 @@ const communitySchema = mongoose.Schema({
             banned : {
                 type : Boolean,
                 default : false
+            },
+            joinedDate : {
+                type : Date,
+                default : Date.now() 
             }
         }
-    ]
+    ],
+    posts : [{
+        type : mongoose.Schema.Types.ObjectId,
+        ref : 'posts' 
+    }]
 },{timestamps : true}) 
 
 const communityModel = mongoose.model('Communities', communitySchema) 
