@@ -27,16 +27,18 @@ module.exports = {
                 req.body.password = await bcrypt.hash(password, 10)
                 let payload
                 await authRepo.createAccount(req.body).then((res) => {
-                    payload = {
-                        id: res._id,
-                        username: res.userName,
+                    console.log("this is the most imp check", res) 
+                    payload = { 
+                        _id: res._id, 
+                        userName: res.userName,
                         email: res.email
                     }
+                    console.log("again this also", payload) 
                 })
                 // create access token
-                const accessToken = createAccessToken(res)
+                const accessToken = createAccessToken(payload) 
                 // create refresh token 
-                const refreshToken = createRefreshToken(res)
+                const refreshToken = createRefreshToken(payload) 
                 // send cookie 
                 res.cookie('refreshToken', refreshToken, {
                     httpOnly: true,
@@ -47,7 +49,7 @@ module.exports = {
                 })
                 // returning the access token 
                 return res.json({ 'accessToken': accessToken, success: true })
-            } 
+            }
         } catch (err) {
             console.log(err)
             res.status(500).send({ message: "Error in the server..please try again", success: false })
@@ -67,27 +69,27 @@ module.exports = {
                     const accessToken = createAccessToken(user)
 
                     // create a refresh token
-                    const refreshToken = createRefreshToken(user)
+                    const refreshToken = createRefreshToken(user) 
 
                     // assigning refresh token in a http-only cookie
-                    res.cookie('refreshToken', refreshToken, { 
-                        httpOnly: true, 
+                    res.cookie('refreshToken', refreshToken, {
+                        httpOnly: true,
                         path: '/',
                         sameSite: 'strict',
                         expiresIn: 24 * 60 * 60 * 1000,
                         secure: true
                     })
                     // returning the access token 
-                    res.cookie('accessToken',accessToken, {
-                        httpOnly : true,
-                        path : '/',
+                    res.cookie('accessToken', accessToken, {
+                        httpOnly: true,
+                        path: '/',
                         sameSite: 'strict',
                         expiresIn: 60 * 1000,
                         secure: true
-                    }) 
-                    return res.json({ success: true }) 
+                    })
+                    return res.json({ success: true })
                 } else {
-                    res.status(200).send({ message: "Incorrect password ! try again", success: false }) 
+                    res.status(200).send({ message: "Incorrect password ! try again", success: false })
                 }
             } else {
                 console.log("no user ");
@@ -104,18 +106,18 @@ module.exports = {
         if (req.cookies?.refreshToken) {
             const refreshToken = req.cookies.refreshToken
             // console.log("here iam") 
-            console.log("refresh", refreshToken)  
-            console.log("refresh end") 
+            console.log("refresh", refreshToken)
+            console.log("refresh end")
             jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET,
                 (err, encoded) => {
                     if (err) {
                         // wrong refresh token
                         console.log("iam wrong")
-                        return res.status(403).send({ message: "Unauthorized" }) 
+                        return res.status(403).send({ message: "Unauthorized" })
                     } else {
                         // correct token so we send a new access token 
-                        console.log("iam right") 
-                        const { id, userName, email } = encoded 
+                        console.log("iam right")
+                        const { id, userName, email } = encoded
                         console.log(userName)
 
                         const accessToken = jwt.sign({
@@ -125,37 +127,51 @@ module.exports = {
                         }, process.env.JWT_ACCESS_SECRET, {
                             expiresIn: '1m'
                         })
-                        console.log(accessToken) 
-                        res.cookie('accessToken',accessToken, {
-                            httpOnly : true,
-                            path : '/',
+                        console.log(accessToken)
+                        res.cookie('accessToken', accessToken, {
+                            httpOnly: true,
+                            path: '/',
                             sameSite: 'strict',
                             expiresIn: 60 * 1000,
                             secure: true
-                        }) 
-                        return res.status(200).send({message : "new accessToken is set", accessToken : accessToken})  
+                        })
+                        return res.status(200).send({ message: "new accessToken is set", accessToken: accessToken })
                     }
                 })
         } else {
-            res.status(403).send({ message: "Unauthorized" }) 
+            res.status(403).send({ message: "Unauthorized" })
         }
     },
 
     // verify Auth
-    verifyAuth : async (req,res) => {
-        const {id, userName, email} = req.body 
+    verifyAuth: async (req, res) => {
+        const { id, userName, email } = req.body
         console.log("id is a", id) 
-        console.log("username is x" ,userName) 
-        const user = await userRepo.getuser(email) 
+        console.log("username is x", userName)
+        const user = await userRepo.getuser(email)
         console.log("user is", user)
-        if(user){
-            res.status(200).send({message : "Authenticated user",success : true, user : {
-                id : user._id, 
-                userName : user.userName,
-                email : user.email
-            }}) 
-        }else{
-            res.status(200).send({message : "user authentication error", success : false }) 
+        if (user) {
+            res.status(200).send({
+                message: "Authenticated user", success: true, user: {
+                    id: user._id,
+                    userName: user.userName,
+                    email: user.email
+                }
+            })
+        } else {
+            res.status(200).send({ message: "user authentication error", success: false })
+        }
+    },
+
+    logout: async (req, res) => {
+        try {
+            console.log(req.body)
+            res.clearCookie('refreshToken')
+            res.clearCookie('accessToken') 
+            return res.status(200).send({ message: "logged out" })
+        } catch (error) {
+            console.log(error) 
+            return res.status(500).send({ message: "server error" })
         }
     }
 }

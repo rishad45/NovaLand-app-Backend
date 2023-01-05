@@ -36,11 +36,24 @@ module.exports = {
                                 }
                             }
                         }
+                    }, {
+                        '$addFields': {
+                            user: mongoose.Types.ObjectId(payload.id)
+                        }
+                    }, {
+                        '$lookup': {
+                            'from': 'users',
+                            'localField': 'user',
+                            'foreignField': '_id',
+                            'as': 'userDetails'
+                        }
                     },
                     {
                         '$project': {
                             'posts': 1,
-                            'name': 1
+                            'name': 1,
+                            'user': 1,
+                            'userDetails': 1
                         }
                     }, {
                         '$lookup': {
@@ -49,19 +62,21 @@ module.exports = {
                             'foreignField': '_id',
                             'as': 'post'
                         }
-                    },{
+                    }, {
                         '$project': {
                             post: 1,
                             name: 1,
-                            _id: 0
+                            user: 1,
+                            _id: 0,
+                            userDetails: 1
                         }
                     }, {
                         '$unwind': {
                             path: '$post'
                         }
-                    },{
-                        '$match' : {
-                            'post.deleted' : false  
+                    }, {
+                        '$match': {
+                            'post.deleted': false
                         }
                     },
                     {
@@ -73,7 +88,7 @@ module.exports = {
                                         $in: [mongoose.Types.ObjectId(payload.id), '$post.likedBy']
                                     }, true, false
                                 ]
-                            }
+                            },
                         }
                     }, {
                         '$addFields': {
@@ -81,12 +96,37 @@ module.exports = {
                                 $size: '$post.likedBy'
                             }
                         }
-                    },{
-                        '$lookup' : {
-                            'from' : 'communities',
-                            'localField' : 'post.communityId',
-                            'foreignField' : '_id',
-                            'as' : 'communityDetails' 
+                    }, {
+                        '$lookup': {
+                            'from': 'communities',
+                            'localField': 'post.communityId',
+                            'foreignField': '_id',
+                            'as': 'communityDetails'
+                        }
+                    }, {
+                        '$unwind': {
+                            'path': '$userDetails'
+                        }
+                    },
+                    {
+                        '$addFields': {
+                            'saved': {
+                                $cond: [
+                                    {
+                                        $in: ['$post._id', '$userDetails.savedPosts']
+                                    }, true, false
+                                ]
+                            }
+                        }
+                    }, {
+                        '$project': {
+                            user: 0,
+                            userDetails: 0,
+                        }
+                    },
+                    {
+                        '$sort': {
+                            'post.createdAt': -1
                         }
                     }
                 ]

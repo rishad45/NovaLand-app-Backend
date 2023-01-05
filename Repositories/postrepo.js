@@ -2,7 +2,9 @@ const postModel = require('../Models/postModel')
 const communityModel = require('../Models/communityModel')
 const commentModel = require('../Models/commentModel')
 const reportModel = require('../Models/reportModel')
-const { default: mongoose } = require('mongoose')
+const { default: mongoose } = require('mongoose') 
+const savedModel = require('../Models/savedModels') 
+const userModel = require('../Models/userModel')
 module.exports = {
     createPost: async ({ communityId, userId, image, description, location }) => {
         try {
@@ -44,12 +46,12 @@ module.exports = {
         }
     },
 
-    deletePost : async (payload) => {
+    deletePost: async (payload) => {
         try {
-            return await postModel.updateOne({_id : payload.postId}, {$set : {deleted : true}})
+            return await postModel.updateOne({ _id: payload.postId }, { $set: { deleted: true } }, { upsert: true })
         } catch (error) {
             console.log(error)
-            return error 
+            return error
         }
     },
 
@@ -62,18 +64,19 @@ module.exports = {
                 comment: comment
             })
         } catch (error) {
-            return false
+            console.log(error)
+            return error
         }
     },
 
-    getPostComments: async (payload) => { 
+    getPostComments: async (payload) => {
         try {
-            return await commentModel.aggregate( 
+            return await commentModel.aggregate(
                 [
                     {
                         '$match': {
                             'postId': mongoose.Types.ObjectId(payload.postId),
-                            'deleted' : false  
+                            'deleted': false
                         }
                     }, {
                         '$addFields': {
@@ -88,6 +91,16 @@ module.exports = {
                             'foreignField': '_id',
                             'as': 'userDetails'
                         }
+                    }, {
+                        '$addFields': {
+                            'liked': {
+                                $cond: [
+                                    {
+                                        $in: [mongoose.Types.ObjectId(payload.id), '$likedBy']
+                                    }, true, false
+                                ]
+                            }
+                        }
                     }
                 ]
             )
@@ -96,19 +109,19 @@ module.exports = {
         }
     },
 
-    getCommentsLength : async (postId) => {
+    getCommentsLength: async (postId) => {
         try {
             return await commentModel.aggregate(
                 [
                     {
-                        '$match' : {
-                            'postId' : mongoose.Types.ObjectId(postId) 
+                        '$match': {
+                            'postId': mongoose.Types.ObjectId(postId)
                         }
-                    },{
-                        '$group' : {
-                            '_id' : '_id',
-                            'sum' : {
-                                '$sum' : 1 
+                    }, {
+                        '$group': {
+                            '_id': '_id',
+                            'sum': {
+                                '$sum': 1
                             }
                         }
                     },
@@ -119,29 +132,151 @@ module.exports = {
         }
     },
 
-    deleteComment : async(payload) => {
+    deleteComment: async (payload) => {
         try {
-            return await commentModel.updateOne({_id : payload},{$set : {deleted : true}})            
-        } catch (error) {
-            return error 
-        }
-    },
-
-    reportComment : async (payload) => {
-        try {
-            return await commentModel.updateOne({_id : payload}, {$set : {'reported.status' : true, 'reported.reason' : payload.reason}})  
+            return await commentModel.updateOne({ _id: payload }, { $set: { deleted: true } })
         } catch (error) {
             return error
         }
     },
 
-    reportContents : async () => {
+    reportComment: async (payload) => {
         try {
-            const con =  await reportModel.find({})
+            return await commentModel.updateOne({ _id: payload.commentId }, { $set: { 'reported.status': true, 'reported.reason': payload.reason } })
+        } catch (error) {
+            return error
+        }
+    },
+
+    reportPost: async (payload) => {
+        try {
+            console.log("pay", payload)
+            return await postModel.updateOne(
+                { _id: payload.postId }, {
+                $set: { 'reported.status': true, 'reported.reason': payload.reason },
+                $push: { 'reported.reportedBy': payload.id }
+            },
+                { upsert: true }
+            )
+        } catch (error) {
+            console.log("error repo", error)
+            return error
+        }
+    },
+
+    reportContents: async () => {
+        try {
+            const con = await reportModel.find({})
             console.log(con)
             return con
         } catch (error) {
             return error
         }
     },
+
+    likeComment: async (payload) => {
+        try {
+            return await commentModel.updateOne({ _id: payload.commentId }, { $push: { likedBy: payload.id } })
+        } catch (error) {
+            return error
+        }
+    },
+    unlikeComment: async (payload) => {
+        try {
+            return await commentModel.updateOne({ _id: payload.commentId }, { $pull: { likedBy: payload.id } })
+        } catch (error) {
+            return error
+        }
+    },
+
+    getPostInfo: async (payload) => {
+        try {
+            return await postModel.aggregate(
+                [
+                    {
+                        '$match': {
+                            '_id': mongoose.Types.ObjectId(payload.postId)
+                        }
+                    }, {
+                        '$lookup': {
+                            'from': 'communities',
+                            'localField': 'communityId',
+                            'foreignField': '_id',
+                            'as': 'communityDetails'
+                        }
+                    }, {
+                        '$lookup': {
+                            'from': 'users',
+                            'localField': 'userId',
+                            'foreignField': '_id',
+                            'as': 'userDetails'
+                        }
+                    }, {
+                        '$project': {
+                            '_id': 0,
+                            'communityId': 0,
+                            'userId': 0,
+                            'updatedAt': 0
+                        }
+                    }, {
+                        '$addFields': {
+                            'likes': {
+                                '$size': '$likedBy'
+                            }
+                        }
+                    }, {
+                        '$addFields': {
+                            'liked': {
+                                '$cond': [
+                                    {
+                                        '$in': [
+                                            mongoose.Types.ObjectId(payload.id), '$likedBy'
+                                        ]
+                                    }, true, false
+                                ]
+                            }
+                        }
+                    }
+                ]
+            )
+        } catch (error) {
+            return error
+        }
+    },
+    // repo to check post saved or not
+    isSaved : async (payload) => {
+        try {
+            await savedModel.findOne({userId : payload.id, saved : payload.postId }).then(res => {
+                console.log("result", res) 
+                if(result === null) return false
+                return false 
+            })     
+        } catch (error) {
+            return error 
+        }
+    },
+    // repo to save post
+    savePost : async (payload) => {
+        try {
+            return await userModel.updateOne({_id : payload.id},{$push : {savedPosts : payload.postId}}, {upsert : true}) 
+        } catch (error) {
+            console.log(error) 
+            return error 
+        }
+    },
+    updateUserSaved : async(userId, savedId) => {
+        try {
+            return await userModel.updateOne({_id : userId},{$set : {savedPosts : savedId}}, {upsert : true}) 
+        } catch (error) {
+            return error 
+        }
+    },
+    // repo to unsave post 
+    unsavePost : async (payload) => {
+        try {
+            return await userModel.updateOne({_id : payload.id},{$pull : {savedPosts : payload.postId}})
+        } catch (error) {
+            return error
+        }
+    }
 }

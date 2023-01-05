@@ -43,6 +43,7 @@ module.exports = {
         try {
             const { id } = req.body
             const communities = await communityRepo.getUserCommunities(id)
+
             console.log(communities)
             res.status(200).send({ message: "fetched succesfully", success: true, data: communities })
         } catch (error) {
@@ -101,15 +102,31 @@ module.exports = {
             const { communityId, id } = req.body
             const information = await communityRepo.getCommunityInfo(communityId)
             if (information) {
-                console.log(information)
+                console.log("info", information)
                 const payload = {
                     userId: id,
                     communityId: communityId
                 }
                 const isMember = await communityRepo.checkUserinCommunity(payload)
                 const isAdmin = await communityRepo.checkIsuserAdmin(payload)
-                if (isMember) return res.status(200).send({ message: "Succesfully fetched", success: true, info: information, isMember: isMember, isAdmin: isAdmin })
-                return res.status(200).send({ message: "Succesfully fetched", success: true, info: information, isMember: isMember, isAdmin: isAdmin })
+                let profile = null
+                let cover = null
+                console.log("mm?", information[0].profilePicture)
+                if (information[0].profilePicture !== '') {
+                    profile = await getSignedUrl(information[0].profilePicture)
+                    console.log("profile", profile)
+                } else {
+                    profile = 'https://i.pinimg.com/564x/67/90/60/679060d15d1dbd809ff81fe1cbe60748.jpg'
+                }
+
+                if (information[0]?.coverPicture) {
+                    cover = await getSignedUrl(information[0]?.coverPicture)
+                    console.log("cover", cover)
+                } else {
+                    cover = 'https://i.pinimg.com/564x/ce/52/3e/ce523e25a1a32db94b258348d960fdb5.jpg'
+                }
+                if (isMember) return res.status(200).send({ message: "Succesfully fetched", success: true, info: information, isMember: isMember, isAdmin: isAdmin, profile: profile, cover: cover })
+                return res.status(200).send({ message: "Succesfully fetched", success: true, info: information, isMember: isMember, isAdmin: isAdmin, profile: profile, cover: cover })
             }
             else {
                 console.log(2)
@@ -123,20 +140,10 @@ module.exports = {
 
     },
 
-    // api for updating profiles
-    updateProfilePicture: async (req, res) => {
-        try {
-            const { id, type, url } = req.body
-
-        } catch (error) {
-            res.status(500).send({ message: "Internal server error", success: false })
-        }
-    },
-
     // api for posts in home 
     postsInHome: async (req, res) => {
         try {
-            const allPosts = await userRepo.getPostsForHome(req.body)
+            const allPosts = await userRepo.getPostsForHome(req.body) 
 
             // ⚠️  ⚠️ ❌ ⚠️  ⚠️
             // commented beacuse of s3 limit
@@ -146,7 +153,7 @@ module.exports = {
             //         let url = await getSignedUrl(allPosts[i].post.image)  
             //         allPosts[i].url = url 
             //     }
-            console.log(allPosts)
+            console.log(allPosts) 
             return res.status(200).send({ message: "all posts are fetched", allPosts: allPosts, success: true })
             // })() 
 
@@ -196,9 +203,9 @@ module.exports = {
                 return res.status(401).send({ message: "can't find the post", success: false })
             })
         } catch (error) {
-            console.log(error) 
-            return res.status(500).send({ message: "Server error", success: false }) 
-        } 
+            console.log(error)
+            return res.status(500).send({ message: "Server error", success: false })
+        }
     },
 
     // api for comment 🔡 
@@ -220,12 +227,12 @@ module.exports = {
     //api for delete a comment
     deleteComment: async (req, res) => {
         try {
-            await postrepo.deleteComment(req.body.commentId).then((result)=> {
-                console.log(result) 
-                if(result.modifiedCount === 1) {
+            await postrepo.deleteComment(req.body.commentId).then((result) => {
+                console.log(result)
+                if (result.modifiedCount === 1) {
                     return res.status(200).send({ message: "comment deleted succesfully", success: true })
-                }else{
-                    return res.status(401).send({ message: "comment not deleted", success: false }) 
+                } else {
+                    return res.status(401).send({ message: "comment not deleted", success: false })
                 }
             })
         } catch (error) {
@@ -235,23 +242,93 @@ module.exports = {
     // api for reporting a comment 🚩 
     reportComment: async (req, res) => {
         try {
-            await postrepo.reportComment(req.body)
-            return res.status(200).send({ message: "comment reported succesfully", success: true })
+            await postrepo.reportComment(req.body).then(result => {
+                if (result.modifiedCount === 1) return res.status(200).send({ message: "comment reported succesfully", success: true })
+                return res.status(401).send({ message: "comment reported error", success: false })
+            })
         } catch (error) {
             return res.status(500).send({ message: "Error from the server", success: false, error: error })
         }
     },
 
-    reportContents: async (req,res) => { 
+    reportPost: async (req, res) => {
         try {
-            const contents = await postrepo.reportContents()
-            console.log(contents)  
-            return res.status(200).send({message : "got Contents", contents:contents}) 
+            console.log("body", req.body)
+            await postrepo.reportPost(req.body).then(result => {
+                console.log("res", result)
+                if (result.modifiedCount === 1) return res.status(200).send({ message: "post reported succesfully", success: true })
+                return res.status(401).send({ message: "post reported error", success: false })
+            })
         } catch (error) {
-           return res.status(500).send({message : "server error"})   
+            console.log(error)
+            return res.status(500).send({ message: "Error from the server", success: false, error: error })
         }
     },
 
+    // api for like comment
+    likeComment: async (req, res) => {
+        try {
+            await postrepo.likeComment(req.body).then((result) => {
+                if (result.modifiedCount === 1) return res.status(200).send({ message: "comment liked", success: true })
+                return res.status(401).send({ message: "comment not liked ", success: false })
+            })
+        } catch (error) {
+            return res.status(500).send({ message: "server error", success: false })
+        }
+    },
+    unlikeComment: async (req, res) => {
+        try {
+            await postrepo.unlikeComment(req.body).then((result) => {
+                if (result.modifiedCount === 1) return res.status(200).send({ message: "comment unliked", success: true })
+                return res.status(401).send({ message: "comment not unliked ", success: false })
+            })
+        } catch (error) {
+            return res.status(500).send({ message: "server error", success: false })
+        }
+    },
+
+    reportContents: async (req, res) => {
+        try {
+            const contents = await postrepo.reportContents()
+            console.log(contents)
+            return res.status(200).send({ message: "got Contents", contents: contents })
+        } catch (error) {
+            return res.status(500).send({ message: "server error" })
+        }
+    },
+
+    // api to check post is saved or not
+    isPostSaved: async (req, res) => {
+        try {
+            console.log("body", req.body)
+            const isSaved = await postrepo.isSaved(req.body)
+            return res.status(200).send({ saved: isSaved })
+        } catch (error) {
+            console.log(error)
+            return res.status(500)
+        }
+    },
+    // api to save post
+    savePost: async (req, res) => {
+        try {
+            console.log("body", req.body)
+            await postrepo.savePost(req.body).then((result) => {
+                console.log(result) 
+            })    
+        } catch (error) {
+            console.log(error)
+            return res.status(500).send({message : "server error", success : false})   
+        }
+    },
+    // api to unsave post 
+    unsavePost : async(req,res) => {
+        try {
+            await postrepo.unsavePost(req.body) 
+            return res.status(200).send({message : "post is unsaved", success : true})
+        } catch (error) {
+            return res.status(500).send({message : "server error", success : true}) 
+        }
+    }
 
 
 }

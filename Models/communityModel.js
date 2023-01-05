@@ -40,7 +40,11 @@ const communitySchema = mongoose.Schema({
     posts : [{
         type : mongoose.Schema.Types.ObjectId,
         ref : 'posts' 
-    }]
+    }],
+    profilePicture : {
+        type : String,
+    },
+    coverPicture : String, 
 },{timestamps : true}) 
 
 const communityModel = mongoose.model('Communities', communitySchema) 

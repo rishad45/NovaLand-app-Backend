@@ -30,6 +30,16 @@ const postSchema = mongoose.Schema({
     deleted : {
         type : Boolean,
         default : false 
+    },
+    reported : {
+        status : {
+            type : Boolean,
+            default : false
+        },
+        reason : {
+            type : String
+        },
+        reportedBy : [mongoose.Types.ObjectId]     
     }
 },{timestamps : true}) 
 

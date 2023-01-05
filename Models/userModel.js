@@ -35,61 +35,67 @@ const userSchema = mongoose.Schema({
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'communities'
             },
-            requestedAt : {
+            requestedAt: {
                 type: Date,
                 default: Date.now()
-            } 
+            }
         }
     ],
-    followers : [
+    followers: [
         {
             id: {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'users'
             },
-            followedAt : {
+            followedAt: {
                 type: Date,
                 default: Date.now()
-            } 
+            }
         }
     ],
-    following : [
+    following: [
         {
             id: {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'users'
             },
-            followedAt : {
+            followedAt: {
                 type: Date,
                 default: Date.now()
-            } 
+            }
         }
     ],
-    pendingUserRequests : [
+    pendingUserRequests: [
         {
             id: {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'users'
             },
-            requestedAt : { 
+            requestedAt: {
                 type: Date,
                 default: Date.now()
-            } 
+            }
         }
     ],
-    myCommunities : [
+    myCommunities: [
         {
             id: {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'communities'
             },
-            createdDate : {
+            createdDate: {
                 type: Date,
-                default: Date.now() 
-            } 
+                default: Date.now()
+            }
         }
-    ] 
-},{timestamps : true})
+    ],
+    savedPosts: [
+        {
+            type: mongoose.Types.ObjectId,
+            ref: 'posts' 
+        }
+    ]
+}, { timestamps: true })
 
 const userModel = mongoose.model('Users', userSchema)
-module.exports = userModel 
+module.exports = userModel  

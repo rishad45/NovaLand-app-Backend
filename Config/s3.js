@@ -1,9 +1,10 @@
-const { S3Client, PutObjectCommand, ListObjectsV2Command, GetObjectCommand } = require('@aws-sdk/client-s3');
+const { S3Client, PutObjectCommand, ListObjectsV2Command, GetObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 
 const { v4: uuidv4 } = require('uuid');
 
 const s3 = new S3Client()
+
 const BUCKET = process.env.BUCKET_NAME
 
 const uploadToS3 = async (file, userId) => {
@@ -56,6 +57,16 @@ const getImagesBykeys = async (key) => {
     try {
         const command = new GetObjectCommand({Bucket : BUCKET, Key : key}) 
         return getSignedUrl(s3, command, {expiresIn : 900}) 
+    } catch (error) {
+        return error 
+    }
+}
+
+
+const deleteObjectsByKey = async(key) => {
+    try {
+        const command = new DeleteObjectCommand({Bucket : BUCKET, Key : key})  
+        return await s3.send(command) 
     } catch (error) {
         return error 
     }

@@ -1,5 +1,6 @@
 const { default: mongoose } = require('mongoose')
 const communityModel = require('../Models/communityModel')
+const postModel = require('../Models/postModel')
 const userModel = require('../Models/userModel')
 module.exports = {
     createCommunity: async (payload) => {
@@ -144,11 +145,23 @@ module.exports = {
         } catch (error) {
 
         }
+    }, 
+    communityPosts : async (payload) => {
+        try {
+            console.log(payload) 
+            return await postModel.find({communityId : payload.communityId, deleted : false}).sort({createdAt : -1})    
+        } catch (error) {
+            return error 
+        }
     },
     // leave community
     leaveCommunity: async (payload) => {
         return await communityModel.updateOne({ _id: payload.communityId },
             { $pull: { users: { userId: payload.id } } }
         )
+    },
+    updateProfile: async (id, key, isCover) => {
+        if (isCover) return await communityModel.updateOne({ _id: id }, { $set: { coverPicture: key } },{upsert : true})  
+        return await communityModel.updateOne({ _id: id }, { $set: { profilePicture: key } })
     }
 }

@@ -12,7 +12,7 @@ const jwt = require('jsonwebtoken')
 // Configuring dotenv
 const dotenv = require('dotenv').config()
 const connectToDB = require('./Config/dbConnect')
-const allowedOrigins = require('./Config/allowedOrigins')
+const allowedOrigins = require('./Config/allowedOrigins') 
 connectToDB()
 
 // cors
