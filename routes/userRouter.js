@@ -1,87 +1,100 @@
-const express = require('express')
-const router = express.Router()
+const express = require('express');
 
+const router = express.Router();
 
-const multer = require('multer') 
-const storage = multer.memoryStorage() 
-const upload = multer({storage}) 
+const multer = require('multer');
 
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 // controllers
-const authController = require('../Controllers/authController') 
-const userController = require('../Controllers/userController')
-const communityController = require('../Controllers/communityController') 
+const authController = require('../Controllers/authController');
+const userController = require('../Controllers/userController');
+const communityController = require('../Controllers/communityController');
+const notificationsController = require('../Controllers/notificationController');
 // middlewares
-const verifyAuth = require('../Middlewares/verifyAuth') 
+const verifyAuth = require('../Middlewares/verifyAuth');
 
+// ........... authentication based api's ...........
 
-//........... authentication based api's ...........
+router.post('/userSignup', authController.userSignup);
 
-router.post('/userSignup',authController.userSignup) 
+router.post('/login', authController.userLogin);
 
-router.post('/login',authController.userLogin)
+router.post('/refresh', authController.refresh);
 
-router.post('/refresh',authController.refresh) 
+router.post('/logout', verifyAuth, authController.logout);
 
-router.post('/logout',verifyAuth, authController.logout)
+router.post('/signup-google', authController.googleSignup);
 
-// router.post('/get-user',verifyAuth,userController.getuser) 
+router.post('/login-with-google', authController.userLoginwithGoogle);
 
-router.post('/verifyAuth',verifyAuth,authController.verifyAuth) 
+router.post('/verifyToken', authController.verifyToken);
 
-//............ community based api's..........................
-router.post('/create-community',verifyAuth,userController.createCommunity)  
+router.post('/changePassword', authController.changePassword);
+// router.post('/get-user',verifyAuth,userController.getuser)
 
-router.get('/get-all-communities', verifyAuth, userController.getAllCommunities) 
+router.post('/verifyAuth', verifyAuth, authController.verifyAuth);
+// user based api s
+router.post('/get-user-info', verifyAuth, userController.getUserInfo);
 
-router.get('/get-user-communities', verifyAuth, userController.getUserCommunities) 
+router.post('/get-userProfile', verifyAuth, userController.getUserProfilepic);
 
-router.get('/get-recommended-communities', verifyAuth, userController.getRecommendedCommunities) 
+router.post('/edit-user-profile', verifyAuth, userController.editUserProfile);
+// ............ community based api's..........................
+router.post('/create-community', verifyAuth, userController.createCommunity);
 
-router.post('/joinInCommunity',verifyAuth,userController.joinInCommunity) 
+router.get('/get-all-communities', verifyAuth, userController.getAllCommunities);
 
-router.post('/community-info',verifyAuth,userController.getCommunityInfoById) 
+router.get('/get-user-communities', verifyAuth, userController.getUserCommunities);
 
-router.post('/update-community-profilePicture',upload.single('image'), verifyAuth, communityController.uploadProfile)    
+router.get('/get-recommended-communities', verifyAuth, userController.getRecommendedCommunities);
 
-router.post('/create-post',upload.single('image'),verifyAuth,communityController.createPost)     
+router.post('/joinInCommunity', verifyAuth, userController.joinInCommunity);
 
-router.post('/get-communityPost-images',verifyAuth,communityController.getCommunityPostImages)   
+router.post('/community-info', verifyAuth, userController.getCommunityInfoById);
 
-router.post('/get-community-posts',verifyAuth,communityController.getCommunityPosts) 
+router.post('/update-profilePicture', upload.single('image'), verifyAuth, communityController.uploadProfile);
 
-router.post('/leave-community',verifyAuth, communityController.leaveCommunity)  
+router.post('/create-post', upload.single('image'), verifyAuth, communityController.createPost);
 
-router.post('/get-posts-ofUser', verifyAuth, userController.postsInHome)  
+router.post('/get-communityPost-images', verifyAuth, communityController.getCommunityPostImages);
 
-router.post('/like-post', verifyAuth, userController.likePost) 
+router.post('/get-community-posts', verifyAuth, communityController.getCommunityPosts);
 
-router.post('/unlike-post', verifyAuth, userController.unlikePost)
+router.post('/leave-community', verifyAuth, communityController.leaveCommunity);
 
-router.post('/save-post',verifyAuth,userController.savePost) 
+router.post('/get-posts-ofUser', verifyAuth, userController.postsInHome);
 
-router.post('/isSaved', verifyAuth,userController.isPostSaved) 
+router.post('/like-post', verifyAuth, userController.likePost);
 
-router.post('/unsave-post', verifyAuth, userController.unsavePost) 
+router.post('/unlike-post', verifyAuth, userController.unlikePost);
 
-router.post('/delete-post', verifyAuth, userController.deletePost) 
+router.post('/save-post', verifyAuth, userController.savePost);
 
-router.post('/add-a-comment',verifyAuth,userController.addAComment)  
+router.post('/isSaved', verifyAuth, userController.isPostSaved);
 
-router.post('/get-comments-of-post', verifyAuth, communityController.getPostComments)
+router.post('/unsave-post', verifyAuth, userController.unsavePost);
 
-router.post('/like-this-comment', verifyAuth,userController.likeComment)
+router.post('/delete-post', verifyAuth, userController.deletePost);
 
-router.post('/unlike-this-comment',verifyAuth, userController.unlikeComment) 
+router.post('/add-a-comment', verifyAuth, userController.addAComment);
 
-router.post('/delete-this-comment', verifyAuth, userController.deleteComment) 
+router.post('/get-comments-of-post', verifyAuth, communityController.getPostComments);
 
-router.post('/report-this-comment',verifyAuth, userController.reportComment) 
+router.post('/like-this-comment', verifyAuth, userController.likeComment);
 
-router.post('/report-this-post',verifyAuth,userController.reportPost)    
+router.post('/unlike-this-comment', verifyAuth, userController.unlikeComment);
 
-router.get('/report-contents',userController.reportContents)
+router.post('/delete-this-comment', verifyAuth, userController.deleteComment);
 
+router.post('/report-this-comment', verifyAuth, userController.reportComment);
 
+router.post('/report-this-post', verifyAuth, userController.reportPost);
 
-module.exports = router 
+router.get('/report-contents', userController.reportContents);
+
+// notifications router
+router.post('/get-user-notifications', verifyAuth, notificationsController.getAllNotifications);
+
+module.exports = router;

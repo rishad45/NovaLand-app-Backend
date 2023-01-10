@@ -1,11 +1,11 @@
-const mongoose = require('mongoose') 
+const mongoose = require('mongoose');
 
 const reportSchema = mongoose.Schema({
-    content : {
-        type : String
-    }
-})
+  content: {
+    type: String,
+  },
+});
 
-const reportModel = mongoose.model('reportReasons',reportSchema)
+const reportModel = mongoose.model('reportReasons', reportSchema);
 
-module.exports = reportModel
+module.exports = reportModel;
