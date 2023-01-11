@@ -124,6 +124,18 @@ module.exports = {
               'admin.__v': 0,
               __v: 0,
             },
+          }, {
+            $addFields: {
+              totalUsers: {
+                $size: '$users',
+              },
+            },
+          }, {
+            $addFields: {
+              totalPosts: {
+                $size: '$posts',
+              },
+            },
           },
         ],
       );

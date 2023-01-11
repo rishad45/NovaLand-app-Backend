@@ -1,6 +1,7 @@
 // models
 const { v4: uuidv4 } = require('uuid');
 const userModel = require('../Models/userModel');
+const subscriptionModel = require('../Models/subscriptionModel');
 
 module.exports = {
   // create a user account
@@ -25,6 +26,13 @@ module.exports = {
       });
     } catch (error) {
       console.log(error);
+      return error;
+    }
+  },
+  subscribe: async (payload) => {
+    try {
+      return await subscriptionModel.create({ ...payload });
+    } catch (error) {
       return error;
     }
   },

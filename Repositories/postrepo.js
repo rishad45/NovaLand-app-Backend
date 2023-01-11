@@ -108,6 +108,10 @@ module.exports = {
                 ],
               },
             },
+          }, {
+            $unwind: {
+              path: '$userDetails',
+            },
           },
         ],
       );

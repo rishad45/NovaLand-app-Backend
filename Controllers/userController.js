@@ -29,6 +29,18 @@ module.exports = {
       const { id } = req.body;
       const communities = await communityRepo.getRecommendedCommunities(id);
       console.log(communities);
+      const promises = [];
+      for (let i = 0; i < communities.length; i += 1) {
+        if (communities[i].profilePicture === null || communities[i].profilePicture === '' || communities[i].profilePicture === undefined) {
+          promises.push(getSignedUrl('default/679060d15d1dbd809ff81fe1cbe60748.jpg'));
+        } else {
+          promises.push(getSignedUrl(communities[i].profilePicture));
+        }
+      }
+      const images = await Promise.all(promises);
+      for (let i = 0; i < images.length; i += 1) {
+        communities[i].image = images[i];
+      }
       res.status(200).send({ message: 'fetched succesfully', success: true, data: communities });
     } catch (error) {
       res.status(500).send({ message: 'fetch unsucceful', success: false, communities: null });
@@ -42,8 +54,23 @@ module.exports = {
       const communities = await communityRepo.getUserCommunities(id);
 
       console.log(communities);
+      const promises = [];
+      for (let i = 0; i < communities.length; i += 1) {
+        console.log(communities[i].profilePicture);
+        if (communities[i].profilePicture === null || communities[i].profilePicture === '' || communities[i].profilePicture === undefined) {
+          promises.push(getSignedUrl('default/679060d15d1dbd809ff81fe1cbe60748.jpg'));
+        } else {
+          promises.push(getSignedUrl(communities[i].profilePicture));
+        }
+      }
+      const images = await Promise.all(promises);
+      for (let i = 0; i < images.length; i += 1) {
+        communities[i].image = images[i];
+      }
+      console.log(communities);
       res.status(200).send({ message: 'fetched succesfully', success: true, data: communities });
     } catch (error) {
+      console.log(error);
       res.status(500).send({ message: 'fetch unsucceful', success: false, communities: null });
     }
   },
@@ -82,7 +109,7 @@ module.exports = {
         const data = await communityRepo.joinInPublicCommunity(req.body);
         console.log('last data', data);
         if (data) {
-          res.status(200).send({ message: `Succesfully joined in ${curr.name}`, success: true });
+          res.status(200).send({ message: `Succesfully joined in ${curr.name}`, success: true, user: req.body.userName });
         }
       }
       // test
@@ -145,19 +172,27 @@ module.exports = {
   postsInHome: async (req, res) => {
     try {
       const allPosts = await userRepo.getPostsForHome(req.body);
-
+      console.log('allPosts are', allPosts);
+      // fetching url of community images
+      const promises = [];
+      for (let i = 0; i < allPosts.length; i += 1) {
+        promises.push(getSignedUrl(allPosts[i].communityDetails.profilePicture));
+      }
+      const urls = await Promise.all(promises);
+      for (let i = 0; i < urls.length; i += 1) {
+        allPosts[i].communityDp = urls[i];
+      }
       // ⚠️  ⚠️ ❌ ⚠️  ⚠️
       // commented beacuse of s3 limit
-
-      // const getUrls = (async () => {
-      //     for (let i = 0; i < allPosts.length; i++) {
-      //         let url = await getSignedUrl(allPosts[i].post.image)
-      //         allPosts[i].url = url
-      //     }
-      console.log(allPosts);
+      const profilePromises = [];
+      for (let i = 0; i < allPosts.length; i += 1) {
+        profilePromises.push(getSignedUrl(allPosts[i].post.image));
+      }
+      const postImages = await Promise.all(profilePromises);
+      for (let i = 0; i < postImages.length; i += 1) {
+        allPosts[i].url = postImages[i];
+      }
       return res.status(200).send({ message: 'all posts are fetched', allPosts, success: true });
-      // })()
-
       // ⚠️  ⚠️ ❌ ⚠️  ⚠️
     } catch (error) {
       return res.status(500).send({ message: 'all posts are not fetched', success: false });
@@ -413,6 +448,18 @@ module.exports = {
       return res.status(200).send({ message: 'Your profile is updated', success: true, errorMessage });
     } catch (error) {
       return res.status(500).send({ message: 'Server error, cannot update the profile right now', success: false });
+    }
+  },
+
+  search: async (req, res) => {
+    try {
+      console.log(req.body);
+      await userRepo.search(req.body.key).then((result) => {
+        console.log('search result', result);
+        return res.status(200).send({ result });
+      });
+    } catch (error) {
+      return res.status(500);
     }
   },
 

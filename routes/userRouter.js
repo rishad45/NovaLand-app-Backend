@@ -15,7 +15,7 @@ const notificationsController = require('../Controllers/notificationController')
 // middlewares
 const verifyAuth = require('../Middlewares/verifyAuth');
 
-// ........... authentication based api's ...........
+// ........... authentication based api's 🔒🗝️...........
 
 router.post('/userSignup', authController.userSignup);
 
@@ -35,13 +35,19 @@ router.post('/changePassword', authController.changePassword);
 // router.post('/get-user',verifyAuth,userController.getuser)
 
 router.post('/verifyAuth', verifyAuth, authController.verifyAuth);
-// user based api s
+
+// user based api s...........👤👤👤......................................
+
 router.post('/get-user-info', verifyAuth, userController.getUserInfo);
 
 router.post('/get-userProfile', verifyAuth, userController.getUserProfilepic);
 
 router.post('/edit-user-profile', verifyAuth, userController.editUserProfile);
-// ............ community based api's..........................
+
+router.post('/search', userController.search);
+
+// ........👩‍👩‍👧‍👧👩‍👩‍👧‍👧👩‍👩‍👧‍👧.... community based api's........👩‍👩‍👧‍👧👩‍👩‍👧‍👧👩‍👩‍👧‍👧.............
+
 router.post('/create-community', verifyAuth, userController.createCommunity);
 
 router.get('/get-all-communities', verifyAuth, userController.getAllCommunities);
@@ -96,5 +102,9 @@ router.get('/report-contents', userController.reportContents);
 
 // notifications router
 router.post('/get-user-notifications', verifyAuth, notificationsController.getAllNotifications);
+
+router.post('/send-notification', verifyAuth, notificationsController.sendNotification);
+
+router.post('/subscribe', authController.subscribe);
 
 module.exports = router;

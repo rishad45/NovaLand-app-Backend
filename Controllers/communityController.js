@@ -38,7 +38,7 @@ module.exports = {
         };
         const saved = await postRepo.savePostinCommunity(payload2);
         console.log('saved', saved);
-        return res.status(200).send({ message: 'uploaded', success: true });
+        return res.status(200).send({ message: 'uploaded', success: true, result });
       }
     } catch (err) {
       return res.status(500).send({ message: 'error occured', success: false });
@@ -101,6 +101,14 @@ module.exports = {
   getPostComments: async (req, res) => {
     try {
       const result = await postRepo.getPostComments(req.body);
+      const promise = [];
+      for (let i = 0; i < result.length; i += 1) {
+        promise.push(getSignedUrl(result[i].userDetails.profilePicture));
+      }
+      const images = await Promise.all(promise);
+      for (let i = 0; i < images.length; i += 1) {
+        result[i].userImage = images[i];
+      }
       console.log('result', result);
       return res.status(200).send({ message: 'Fetched succefully', comments: result, success: true });
     } catch (error) {

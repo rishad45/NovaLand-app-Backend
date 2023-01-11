@@ -111,6 +111,10 @@ module.exports = {
             $unwind: {
               path: '$userDetails',
             },
+          }, {
+            $unwind: {
+              path: '$communityDetails',
+            },
           },
           {
             $addFields: {
@@ -254,6 +258,17 @@ module.exports = {
       );
     } catch (error) {
       console.log(error);
+      return error;
+    }
+  },
+
+  search: async (payload) => {
+    try {
+      return await communityModel.find(
+        { name: { $regex: new RegExp(`.*${payload}.*`, 'i') } },
+        { name: 1, profilePicture: 1, _id: 1 },
+      );
+    } catch (error) {
       return error;
     }
   },

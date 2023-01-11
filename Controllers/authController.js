@@ -2,6 +2,7 @@
 // modules
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const webPush = require('web-push');
 
 // Repositories
 const userRepo = require('../Repositories/userRepo');
@@ -166,6 +167,7 @@ module.exports = {
     console.log('username is x', userName);
     const user = await userRepo.getuser(email);
     console.log('user is', user);
+    const userImage = await getSignedUrl(user.profilePicture);
     if (user) {
       res.status(200).send({
         message: 'Authenticated user',
@@ -175,6 +177,7 @@ module.exports = {
           userName: user.userName,
           email: user.email,
           bio: user.bio,
+          profile: userImage,
         },
       });
     } else {
@@ -285,7 +288,7 @@ module.exports = {
             console.log(accessToken);
             console.log(refreshToken);
             // returning the access token
-            return res.json({ accessToken, success: true });
+            return res.json({ accessToken, success: true, user });
           }
           return res.status(400).send({ message: 'User not found, signup if you have not created an account before' });
         });
@@ -327,5 +330,33 @@ module.exports = {
     } catch (error) {
       return res.status(500).send({ message: 'Server error', success: false });
     }
+  },
+
+  subscribe: async (req, res) => {
+    try {
+      console.log('bdd', req.body);
+      const newSubscription = await authRepo.subscribe(req.body);
+      console.log('new subscription', newSubscription);
+      const options = {
+        vapidDetails: {
+          subject: 'mailto:45rishadricu@gmail.com',
+          publicKey: process.env.VAPID_PUBLIC_KEY,
+          privateKey: process.env.VAPID_PRIVATE_KEY,
+        },
+      };
+      await webPush.sendNotification(
+        newSubscription,
+        JSON.stringify({
+          title: 'Hello from NovaLand',
+          description: 'this message is coming from the server',
+          image: 'https://cdn2.vectorstock.com/i/thumb-large/94/66/emoji-smile-icon-symbol-smiley-face-vector-26119466.jpg',
+        }),
+        options,
+      );
+      res.sendStatus(200);
+    } catch (error) {
+      return res.status(500).send({ error });
+    }
+    return null;
   },
 };
