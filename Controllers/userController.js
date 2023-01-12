@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable consistent-return */
 // repositories
 const communityRepo = require('../Repositories/communityRepo');
@@ -454,11 +455,24 @@ module.exports = {
   search: async (req, res) => {
     try {
       console.log(req.body);
-      await userRepo.search(req.body.key).then((result) => {
-        console.log('search result', result);
-        return res.status(200).send({ result });
-      });
+      const result = await userRepo.search(req.body.key);
+      const promises = [];
+      for (let i = 0; i < result.length; i += 1) {
+        console.log(1);
+        if (result[i].profilePicture === null || result[i].profilePicture === '' || result[i].profilePicture === undefined) {
+          promises.push(getSignedUrl('default/679060d15d1dbd809ff81fe1cbe60748.jpg'));
+        } else {
+          promises.push(getSignedUrl(result[i].profilePicture));
+        }
+      }
+      const images = await Promise.all(promises);
+      for (let i = 0; i < result.length; i += 1) {
+        result[i].image = images[i];
+      }
+      console.log(result);
+      return res.status(200).send({ result });
     } catch (error) {
+      console.log(error);
       return res.status(500);
     }
   },

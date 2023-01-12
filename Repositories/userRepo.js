@@ -267,7 +267,7 @@ module.exports = {
       return await communityModel.find(
         { name: { $regex: new RegExp(`.*${payload}.*`, 'i') } },
         { name: 1, profilePicture: 1, _id: 1 },
-      );
+      ).lean();
     } catch (error) {
       return error;
     }

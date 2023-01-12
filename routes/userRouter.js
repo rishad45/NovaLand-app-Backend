@@ -44,7 +44,7 @@ router.post('/get-userProfile', verifyAuth, userController.getUserProfilepic);
 
 router.post('/edit-user-profile', verifyAuth, userController.editUserProfile);
 
-router.post('/search', userController.search);
+router.post('/search', verifyAuth, userController.search);
 
 // ........👩‍👩‍👧‍👧👩‍👩‍👧‍👧👩‍👩‍👧‍👧.... community based api's........👩‍👩‍👧‍👧👩‍👩‍👧‍👧👩‍👩‍👧‍👧.............
 
