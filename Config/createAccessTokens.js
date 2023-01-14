@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 const jwt = require('jsonwebtoken');
 
 const createAccessToken = (payload) => {

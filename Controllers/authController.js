@@ -136,20 +136,20 @@ module.exports = {
           console.log('iam right');
           const { id, userName, email } = encoded;
           console.log(userName);
-
+          const expiryDate = new Date(Date.now() + 60 * 60 * 1000);
           const accessToken = jwt.sign({
             id,
             userName,
             email,
           }, process.env.JWT_ACCESS_SECRET, {
-            expiresIn: '1m',
+            expiresIn: '1h',
           });
           console.log(accessToken);
           res.cookie('accessToken', accessToken, {
             httpOnly: true,
             path: '/',
             sameSite: 'strict',
-            expiresIn: 60 * 1000,
+            expiresIn: expiryDate,
             secure: true,
           });
           return res.status(200).send({ message: 'new accessToken is set', accessToken });
@@ -348,7 +348,7 @@ module.exports = {
         newSubscription,
         JSON.stringify({
           title: 'Hello from NovaLand',
-          description: 'this message is coming from the server',
+          description: 'You will recive Newest nofications from now on',
           image: 'https://cdn2.vectorstock.com/i/thumb-large/94/66/emoji-smile-icon-symbol-smiley-face-vector-26119466.jpg',
         }),
         options,

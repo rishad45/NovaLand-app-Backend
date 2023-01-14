@@ -109,6 +109,10 @@ const userSchema = mongoose.Schema({
       ref: 'communities',
     },
   ],
+  blocked: {
+    type: Boolean,
+    default: false,
+  },
 }, { timestamps: true });
 
 const userModel = mongoose.model('Users', userSchema);
