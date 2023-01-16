@@ -4,13 +4,8 @@ const app = express();
 
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-// file uploading
-// const bodyParser = require('body-parser');
+const { Server } = require('socket.io');
 
-// const jwt = require('jsonwebtoken');
-
-// Configuring dotenv
-// const dotenv = require('dotenv').config();
 const connectToDB = require('./Config/dbConnect');
 const allowedOrigins = require('./Config/allowedOrigins');
 const transporter = require('./Config/nodemailer');
@@ -25,6 +20,37 @@ app.use(cors(
     credentials: true, // allow session cookie from browser to pass through
   },
 ));
+
+// running socket
+const NEW_CHAT_MESSAGE_EVENT = 'newMessageChat';
+const io = new Server(8000, {
+  cors: {
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    credentials: true,
+  },
+});
+
+console.log('socket running');
+
+io.on('connection', (socket) => {
+  console.log(`user Connected ${socket.id}`);
+
+  // Join in a chat
+  const { roomId } = socket.handshake.query;
+  socket.join(roomId);
+
+  // for new messages
+  socket.on(NEW_CHAT_MESSAGE_EVENT, (data) => {
+    io.in(roomId).emit(NEW_CHAT_MESSAGE_EVENT, data);
+  });
+
+  // leave the room
+  socket.on('disconnect', () => {
+    console.log(`Client ${socket.id} leaved the chatroom`);
+    socket.leave(roomId);
+  });
+});
 
 // Setting up middlewares to parse request body and cookies
 app.use(express.json());
@@ -49,13 +75,6 @@ transporter.verify((err, success) => {
     : console.log(`=== Server is ready to take messages: ${success} ===`);
 });
 
-// const mailOptions = {
-//   from: 'test@gmail.com',
-//   to: process.env.EMAIL,
-//   subject: 'Nodemailer API',
-//   text: 'Hi from your nodemailer API',
-// };
-
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   next();
@@ -69,7 +88,5 @@ app.get('/', (req, res) => {
   res.write('hello dev');
   res.end();
 });
-
-// const upload = multer({ dest: "public/files" });
 
 module.exports = app;
