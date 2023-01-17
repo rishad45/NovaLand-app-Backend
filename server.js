@@ -7,7 +7,7 @@ const cookieParser = require('cookie-parser');
 const { Server } = require('socket.io');
 
 const connectToDB = require('./Config/dbConnect');
-const allowedOrigins = require('./Config/allowedOrigins');
+// const allowedOrigins = require('./Config/allowedOrigins');
 const transporter = require('./Config/nodemailer');
 
 connectToDB();
@@ -15,7 +15,7 @@ connectToDB();
 // cors
 app.use(cors(
   {
-    origin: allowedOrigins, // allow the server to accept request from different origin
+    origin: '*', // allow the server to accept request from different origin
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true, // allow session cookie from browser to pass through
   },
