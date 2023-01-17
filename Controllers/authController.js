@@ -101,6 +101,8 @@ module.exports = {
             expiresIn: 60 * 60 * 1000,
             secure: true,
           });
+          console.log(accessToken);
+          console.log(refreshToken);
           user.url = getSignedUrl(user.profilePicture);
           console.log('all okey');
           return res.json({ success: true, user });
