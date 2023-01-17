@@ -75,11 +75,11 @@ transporter.verify((err, success) => {
     : console.log(`=== Server is ready to take messages: ${success} ===`);
 });
 
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'https://taupe-kangaroo-a4f2a8.netlify.app');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  next();
-});
+// app.use((req, res, next) => {
+//   res.header('Access-Control-Allow-Origin', 'https://taupe-kangaroo-a4f2a8.netlify.app');
+//   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+//   next();
+// });
 
 app.listen(5000, () => {
   console.log('server started on 5000');
