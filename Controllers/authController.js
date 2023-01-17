@@ -102,6 +102,7 @@ module.exports = {
             secure: true,
           });
           user.url = getSignedUrl(user.profilePicture);
+          console.log('all okey');
           return res.json({ success: true, user });
           // eslint-disable-next-line no-else-return
         } else {
