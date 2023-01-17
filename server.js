@@ -25,7 +25,7 @@ app.use(cors(
 const NEW_CHAT_MESSAGE_EVENT = 'newMessageChat';
 const io = new Server(8000, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: allowedOrigins,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     credentials: true,
   },
@@ -76,7 +76,7 @@ transporter.verify((err, success) => {
 });
 
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Origin', 'https://taupe-kangaroo-a4f2a8.netlify.app');
   next();
 });
 
