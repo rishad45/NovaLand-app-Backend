@@ -80,29 +80,29 @@ module.exports = {
         const isPasswordmatch = await bcrypt.compare(password, user.password);
         if (isPasswordmatch) {
           // create a access token
-          const accessToken = createAccessToken(user);
+          // const accessToken = createAccessToken(user);
 
           // create a refresh token
-          const refreshToken = createRefreshToken(user);
+          // const refreshToken = createRefreshToken(user);
 
           // assigning refresh token in a http-only cookie
-          res.cookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            path: '/',
-            sameSite: 'strict',
-            expiresIn: 24 * 60 * 60 * 1000,
-            secure: true,
-          });
+          // res.cookie('refreshToken', refreshToken, {
+          //   httpOnly: true,
+          //   path: '/',
+          //   sameSite: 'strict',
+          //   expiresIn: 24 * 60 * 60 * 1000,
+          //   secure: true,
+          // });
           // returning the access token
-          res.cookie('accessToken', accessToken, {
-            httpOnly: true,
-            path: '/',
-            sameSite: 'strict',
-            expiresIn: 60 * 60 * 1000,
-            secure: true,
-          });
-          console.log(accessToken);
-          console.log(refreshToken);
+          // res.cookie('accessToken', accessToken, {
+          //   httpOnly: true,
+          //   path: '/',
+          //   sameSite: 'strict',
+          //   expiresIn: 60 * 60 * 1000,
+          //   secure: true,
+          // });
+          // console.log(accessToken);
+          // console.log(refreshToken);
           user.url = getSignedUrl(user.profilePicture);
           console.log('all okey');
           return res.json({ success: true, user });
