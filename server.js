@@ -23,7 +23,7 @@ app.use(cors(
 
 // running socket
 const NEW_CHAT_MESSAGE_EVENT = 'newMessageChat';
-const io = new Server(8000, {
+const io = new Server(4545, {
   cors: {
     origin: allowedOrigins,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
