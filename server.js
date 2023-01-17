@@ -77,6 +77,7 @@ transporter.verify((err, success) => {
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', 'https://taupe-kangaroo-a4f2a8.netlify.app');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   next();
 });
 
