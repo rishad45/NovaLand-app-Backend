@@ -6,6 +6,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 
 const server = http.createServer(app);
+console.log('serv', server);
 const io = require('socket.io')(server);
 const connectToDB = require('./Config/dbConnect');
 const allowedOrigins = require('./Config/allowedOrigins');
@@ -26,7 +27,10 @@ app.use(cors(
 const NEW_CHAT_MESSAGE_EVENT = 'newMessageChat';
 
 console.log('socket running');
-console.log(io);
+io.on('error', (error) => {
+  console.log(`Error: ${error}`);
+});
+
 io.on('connection', (socket) => {
   console.log(`user Connected ${socket.id}`);
   // Join in a chat
@@ -79,7 +83,7 @@ server.listen(5000, () => {
 });
 
 app.get('/', (req, res) => {
-  res.write('hello dev mm', io);
+  res.write('hello dev mm');
   res.end();
 });
 
