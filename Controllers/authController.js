@@ -89,7 +89,6 @@ module.exports = {
           res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             path: '/',
-            sameSite: 'strict',
             expiresIn: 24 * 60 * 60 * 1000,
             secure: true,
           });
@@ -97,7 +96,6 @@ module.exports = {
           res.cookie('accessToken', accessToken, {
             httpOnly: true,
             path: '/',
-            sameSite: 'strict',
             expiresIn: 60 * 60 * 1000,
             secure: true,
           });
