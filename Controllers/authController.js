@@ -60,7 +60,7 @@ module.exports = {
           secure: true,
         });
         // returning the access token
-        return res.json({ accessToken, success: true });
+        return res.json({ accessToken, success: true, user: payload });
       }
     } catch (err) {
       console.log(err);
@@ -102,9 +102,17 @@ module.exports = {
             sameSite: 'none',
           });
           console.log(accessToken);
-          user.url = getSignedUrl(user.profilePicture);
-          console.log('all okey');
-          return res.json({ success: true, user });
+          const url = await getSignedUrl(user.profilePicture);
+          console.log('all okey', user);
+          const loginedUser = {
+            userName: user.userName,
+            email: user.email,
+            _id: user._id,
+            bio: user.bio,
+            profile: url,
+          };
+          console.log('login user', loginedUser);
+          return res.json({ success: true, user: loginedUser });
           // eslint-disable-next-line no-else-return
         } else {
           res.status(200).send({ message: 'Incorrect password ! try again', success: false });
