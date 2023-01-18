@@ -13,13 +13,12 @@ const transporter = require('./Config/nodemailer');
 connectToDB();
 
 // cors
-app.use(cors(
-  {
-    origin: allowedOrigins, // allow the server to accept request from different origin
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true, // allow session cookie from browser to pass through
-  },
-));
+app.use(cors());
+// {
+//   origin: allowedOrigins, // allow the server to accept request from different origin
+//   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+//   credentials: true, // allow session cookie from browser to pass through
+// },
 
 // running socket
 const NEW_CHAT_MESSAGE_EVENT = 'newMessageChat';
