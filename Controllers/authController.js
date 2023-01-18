@@ -91,6 +91,7 @@ module.exports = {
             path: '/',
             expiresIn: 24 * 60 * 60 * 1000,
             secure: true,
+            sameSite: 'none',
           });
           // returning the access token
           res.cookie('accessToken', accessToken, {
@@ -98,6 +99,7 @@ module.exports = {
             path: '/',
             expiresIn: 60 * 60 * 1000,
             secure: true,
+            sameSite: 'none',
           });
           console.log(accessToken);
           user.url = getSignedUrl(user.profilePicture);
