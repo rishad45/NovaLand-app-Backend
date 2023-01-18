@@ -1,11 +1,12 @@
 const express = require('express');
+const http = require('http');
 
 const app = express();
-
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-const { Server } = require('socket.io');
 
+const server = http.createServer(app);
+const io = require('socket.io')(server);
 const connectToDB = require('./Config/dbConnect');
 const allowedOrigins = require('./Config/allowedOrigins');
 const transporter = require('./Config/nodemailer');
@@ -23,16 +24,9 @@ app.use(cors(
 
 // running socket
 const NEW_CHAT_MESSAGE_EVENT = 'newMessageChat';
-const io = new Server(8000, {
-  cors: {
-    origin: allowedOrigins,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    credentials: true,
-  },
-});
 
 console.log('socket running');
-
+console.log(io);
 io.on('connection', (socket) => {
   console.log(`user Connected ${socket.id}`);
 
@@ -81,12 +75,12 @@ transporter.verify((err, success) => {
 //   next();
 // });
 
-app.listen(5000, () => {
+server.listen(5000, () => {
   console.log('server started on 5000');
 });
 
 app.get('/', (req, res) => {
-  res.write('hello dev');
+  res.write('hello dev mm');
   res.end();
 });
 
