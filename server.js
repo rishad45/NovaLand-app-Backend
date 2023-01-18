@@ -29,7 +29,6 @@ console.log('socket running');
 console.log(io);
 io.on('connection', (socket) => {
   console.log(`user Connected ${socket.id}`);
-
   // Join in a chat
   const { roomId } = socket.handshake.query;
   socket.join(roomId);
@@ -80,7 +79,7 @@ server.listen(5000, () => {
 });
 
 app.get('/', (req, res) => {
-  res.write('hello dev mm');
+  res.write('hello dev mm', io);
   res.end();
 });
 
