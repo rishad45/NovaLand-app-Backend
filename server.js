@@ -6,8 +6,12 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 
 const server = http.createServer(app);
-console.log('serv', server);
-const io = require('socket.io')(server);
+const io = require('socket.io')(server, {
+  cors: {
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST'],
+  },
+});
 const connectToDB = require('./Config/dbConnect');
 const allowedOrigins = require('./Config/allowedOrigins');
 const transporter = require('./Config/nodemailer');
