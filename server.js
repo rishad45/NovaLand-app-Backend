@@ -8,7 +8,7 @@ const cookieParser = require('cookie-parser');
 const server = http.createServer(app);
 const io = require('socket.io')(server, {
   cors: {
-    origin: 'https://vocal-faloodeh-5d3f47.netlify.app',
+    origin: 'https://coruscating-licorice-29ec4b.netlify.app',
     methods: ['GET', 'POST'],
   },
 });
